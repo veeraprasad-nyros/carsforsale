@@ -1,0 +1,84 @@
+ //database: carsforsale
+ //
+ //tables  
+
+ CREATE TABLE `cars_tbl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `c_name` varchar(50) NOT NULL,
+  `c_price` int(11) DEFAULT NULL,
+  `c_cond` varchar(30) DEFAULT NULL,
+  `c_mile` varchar(30) DEFAULT NULL,
+  `c_desc` text,
+  `c_src` blob NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `c_name_cars_idx_blob` (`c_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1
+
+
+mysql> show create table cars_tbl \G;
+*************************** 1. row ***************************
+       Table: cars_tbl
+Create Table: CREATE TABLE `cars_tbl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `c_name` varchar(50) NOT NULL,
+  `c_price` int(11) DEFAULT NULL,
+  `c_cond` varchar(30) DEFAULT NULL,
+  `c_mile` varchar(30) DEFAULT NULL,
+  `c_desc` text,
+  `c_src` blob NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `c_name_cars_idx_blob` (`c_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1
+
+
+
+mysql> show create table guest_tbl \G;
+*************************** 1. row ***************************
+       Table: guest_tbl
+Create Table: CREATE TABLE `guest_tbl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1
+
+
+mysql> show create table review_tbl \G;
+*************************** 1. row ***************************
+       Table: review_tbl
+Create Table: CREATE TABLE `review_tbl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `guest_id` int(11) NOT NULL,
+  `car_id` int(11) NOT NULL,
+  `rate` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `review_guestid_fk` (`guest_id`),
+  KEY `review_carid_fk` (`car_id`),
+  KEY `review_rateid_fk` (`rate`),
+  CONSTRAINT `review_carid_fk` FOREIGN KEY (`car_id`) REFERENCES `cars_tbl` (`id`),
+  CONSTRAINT `review_guestid_fk` FOREIGN KEY (`guest_id`) REFERENCES `guest_tbl` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=latin1
+
+
+mysql> show create table rate_tbl \G;
+*************************** 1. row ***************************
+       Table: rate_tbl
+Create Table: CREATE TABLE `rate_tbl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `star` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1
+
+
+//transations for default values
+
+mysql> select * from review_tbl;
++----+----------+--------+---------+
+| id | guest_id | car_id | rate    |
++----+----------+--------+---------+
+|  1 |        1 |     24 |       5 |
++----+----------+--------+---------+
+
+insert into review_tbl (guest_id,car_id,rate) values (1,23,2),(1,22,3),(1,21,2),(1,20,3),
+(1,19,4),(1,18,2),(1,17,2),(1,16,2),(1,15,2),
+(1,14,2),(1,13,2),(1,12,1),(1,11,3),(1,10,2),
+(1,9,2),(1,8,2),(1,7,1),(1,6,1),(1,5,1),(1,4,2),(1,3,1),(1,2,2),(1,1,2);

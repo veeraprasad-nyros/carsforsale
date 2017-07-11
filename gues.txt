@@ -1,0 +1,362 @@
+mysql> create table guest_tbl ( id int NOT NULL AUTO_INCREMENT, name varchar(50) NOT NULL,CONSTRAINT guest_pk PRIMARY KEY (id));
+
+mysql> show create table guest_tbl\G;
+*************************** 1. row ***************************
+       Table: guest_tbl
+Create Table: CREATE TABLE `guest_tbl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+mysql> desc guest_tbl;
++-------+-------------+------+-----+---------+----------------+
+| Field | Type        | Null | Key | Default | Extra          |
++-------+-------------+------+-----+---------+----------------+
+| id    | int(11)     | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(50) | NO   |     | NULL    |                |
++-------+-------------+------+-----+---------+----------------+
+
+mysql> insert into guest_tbl (name) values('prasad'),('ram');
+
+mysql> select * from guest_tbl;
++----+--------+
+| id | name   |
++----+--------+
+|  1 | prasad |
+|  2 | ram    |
++----+--------+
+
+
+mysql> CREATE TABLE rate_tbl (id int NOT NULL AUTO_INCREMENT,star int NOT NULL,
+    -> CONSTRAINT rate_pk PRIMARY KEY(id));
+
+mysql> show create table rate_tbl \G;
+*************************** 1. row ***************************
+       Table: rate_tbl
+Create Table: CREATE TABLE `rate_tbl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `star` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+mysql> desc rate_tbl;
++-------+---------+------+-----+---------+----------------+
+| Field | Type    | Null | Key | Default | Extra          |
++-------+---------+------+-----+---------+----------------+
+| id    | int(11) | NO   | PRI | NULL    | auto_increment |
+| star  | int(11) | NO   |     | NULL    |                |
++-------+---------+------+-----+---------+----------------+
+
+mysql> insert into rate_tbl (star) values(1),(2),(3),(4),(5);
+
+mysql> select * from rate_tbl;
++----+------+
+| id | star |
++----+------+
+|  1 |    1 |
+|  2 |    2 |
+|  3 |    3 |
+|  4 |    4 |
+|  5 |    5 |
++----+------+
+
+mysql> create table review_tbl (
+    -> id int NOT NULL AUTO_INCREMENT,
+    -> guest_id int NOT NULL,
+    -> car_id int NOT NULL,
+    -> rate_id int NOT NULL,
+    -> CONSTRAINT review_pk PRIMARY KEY(id),
+    -> CONSTRAINT review_guestid_fk FOREIGN KEY(guest_id) REFERENCES guest_tbl(id),
+    -> CONSTRAINT review_carid_fk FOREIGN KEY(car_id) REFERENCES cars_tbl(id),
+    -> CONSTRAINT review_rateid_fk FOREIGN KEY(rate_id) REFERENCES rate_tbl(id)
+    -> );
+
+mysql> show create table review_tbl \G;
+*************************** 1. row ***************************
+       Table: review_tbl
+Create Table: CREATE TABLE `review_tbl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `guest_id` int(11) NOT NULL,
+  `car_id` int(11) NOT NULL,
+  `rate_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `review_guestid_fk` (`guest_id`),
+  KEY `review_carid_fk` (`car_id`),
+  KEY `review_rateid_fk` (`rate_id`),
+  CONSTRAINT `review_guestid_fk` FOREIGN KEY (`guest_id`) REFERENCES `guest_tbl` (`id`),
+  CONSTRAINT `review_carid_fk` FOREIGN KEY (`car_id`) REFERENCES `cars_tbl` (`id`),
+  CONSTRAINT `review_rateid_fk` FOREIGN KEY (`rate_id`) REFERENCES `rate_tbl` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+I droped the foreign key.
+mysql> alter table review_tbl drop foreign key `review_rateid_fk`;
+and changed the rate_id to rate
+mysql> alter table review_tbl change rate_id rate int NOT NULL;
+
+mysql> desc review_tbl;
++----------+---------+------+-----+---------+----------------+
+| Field    | Type    | Null | Key | Default | Extra          |
++----------+---------+------+-----+---------+----------------+
+| id       | int(11) | NO   | PRI | NULL    | auto_increment |
+| guest_id | int(11) | NO   | MUL | NULL    |                |
+| car_id   | int(11) | NO   | MUL | NULL    |                |
+| rate     | int(11) | NO   | MUL | NULL    |                |
++----------+---------+------+-----+---------+----------------+
+
+
+mysql> insert into review_tbl (guest_id,car_id,rate) values (1,24,5);
+
+mysql> select * from review_tbl;
++----+----------+--------+---------+
+| id | guest_id | car_id | rate    |
++----+----------+--------+---------+
+|  1 |        1 |     24 |       5 |
++----+----------+--------+---------+
+
+insert into review_tbl (guest_id,car_id,rate) values (1,23,2),(1,22,3),(1,21,2),(1,20,3),
+(1,19,4),(1,18,2),(1,17,2),(1,16,2),(1,15,2),
+(1,14,2),(1,13,2),(1,12,1),(1,11,3),(1,10,2),
+(1,9,2),(1,8,2),(1,7,1),(1,6,1),(1,5,1),(1,4,2),(1,3,1),(1,2,2),(1,1,2);
+
+
+
+mysql>  select count(*),car_id,sum(rate) from review_tbl group by car_id;
+
+mysql> select cars_tbl.id, c_name,rate from cars_tbl,review_tbl where cars_tbl.id = review_tbl.car_id;
++----+----------------------------------+------+
+| id | c_name                           | rate |
++----+----------------------------------+------+
+| 24 | 1962 Austin-Healey 3000 MK II    |    5 |
+| 23 | 1959 Austin-Healey 100-6         |    2 |
+| 22 | 1958 Austin-Healey 100-6         |    3 |
+| 21 | 1965 Austin-Healey 3000          |    2 |
+| 20 | 1958 Austin-Healey BN4           |    3 |
+| 19 | 1966 Austin-Healey 3000          |    4 |
+| 18 | 1960 Austin-Healey BT7           |    2 |
+| 17 | 1963 Austin-Healey 3000          |    2 |
+| 16 | 1967 Austin-Healey 3000          |    2 |
+| 15 | 1959 Austin-Healey BT7           |    2 |
+| 14 | 1954 Austin-Healey 100-4         |    2 |
+| 13 | 1956 Austin-Healey 100-4         |    2 |
+| 12 | 1960 Austin-Healey MK I          |    1 |
+| 11 | 1956 Austin-Healey 100M Le Mans  |    3 |
+| 10 | 1967 Austin-Healey 3000 Mk III   |    2 |
+|  9 | 1956 Austin-Healey Convertible   |    2 |
+|  8 | 1962 Austin-Healey 3000          |    2 |
+|  7 | 1961 Austin-Healey 3000 Mark1    |    1 |
+|  6 | 1953 Austin-Healey 100-4         |    1 |
+|  5 | 1960 Austin-Healey 3000          |    1 |
+|  4 | 1960 Austin-Healey 3000          |    2 |
+|  3 | 1967 Austin-Healey 3000          |    1 |
+|  2 | 1959 Austin-Healey Sprite MKIII  |    2 |
+|  1 | 1958 Austin-Healey Sprite MKIII  |    2 |
+| 23 | 1959 Austin-Healey 100-6         |    4 |
++----+----------------------------------+------+
+
+
+mysql> select cars_tbl.id, c_name,sum(rate)/count(*) avg from cars_tbl,review_tbl where cars_tbl.id = review_tbl.car_id group by cars_tbl.id;
++----+----------------------------------+--------+
+| id | c_name                           | avg    |
++----+----------------------------------+--------+
+|  1 | 1958 Austin-Healey Sprite MKIII  | 2.0000 |
+|  2 | 1959 Austin-Healey Sprite MKIII  | 2.0000 |
+|  3 | 1967 Austin-Healey 3000          | 1.0000 |
+|  4 | 1960 Austin-Healey 3000          | 2.0000 |
+|  5 | 1960 Austin-Healey 3000          | 1.0000 |
+|  6 | 1953 Austin-Healey 100-4         | 1.0000 |
+|  7 | 1961 Austin-Healey 3000 Mark1    | 1.0000 |
+|  8 | 1962 Austin-Healey 3000          | 2.0000 |
+|  9 | 1956 Austin-Healey Convertible   | 2.0000 |
+| 10 | 1967 Austin-Healey 3000 Mk III   | 2.0000 |
+| 11 | 1956 Austin-Healey 100M Le Mans  | 3.0000 |
+| 12 | 1960 Austin-Healey MK I          | 1.0000 |
+| 13 | 1956 Austin-Healey 100-4         | 2.0000 |
+| 14 | 1954 Austin-Healey 100-4         | 2.0000 |
+| 15 | 1959 Austin-Healey BT7           | 2.0000 |
+| 16 | 1967 Austin-Healey 3000          | 2.0000 |
+| 17 | 1963 Austin-Healey 3000          | 2.0000 |
+| 18 | 1960 Austin-Healey BT7           | 2.0000 |
+| 19 | 1966 Austin-Healey 3000          | 4.0000 |
+| 20 | 1958 Austin-Healey BN4           | 3.0000 |
+| 21 | 1965 Austin-Healey 3000          | 2.0000 |
+| 22 | 1958 Austin-Healey 100-6         | 3.0000 |
+| 23 | 1959 Austin-Healey 100-6         | 3.0000 |
+| 24 | 1962 Austin-Healey 3000 MK II    | 5.0000 |
++----+----------------------------------+--------+
+
+mysql> select car_id, count(car_id) review,round(sum(rate)/count(car_id),1) avg from review_tbl group by car_id;
++--------+--------+------+
+| car_id | review | avg  |
++--------+--------+------+
+|      1 |      1 |  2.0 |
+|      2 |      1 |  2.0 |
+|      3 |      1 |  1.0 |
+|      4 |      1 |  2.0 |
+|      5 |      1 |  1.0 |
+|      6 |      1 |  1.0 |
+|      7 |      1 |  1.0 |
+|      8 |      1 |  2.0 |
+|      9 |      1 |  2.0 |
+|     10 |      1 |  2.0 |
+|     11 |      1 |  3.0 |
+|     12 |      1 |  1.0 |
+|     13 |      1 |  2.0 |
+|     14 |      1 |  2.0 |
+|     15 |      1 |  2.0 |
+|     16 |      1 |  2.0 |
+|     17 |      1 |  2.0 |
+|     18 |      1 |  2.0 |
+|     19 |      1 |  4.0 |
+|     20 |      1 |  3.0 |
+|     21 |      1 |  2.0 |
+|     22 |      1 |  3.0 |
+|     23 |      2 |  3.0 |
+|     24 |      1 |  5.0 |
++--------+--------+------+
+
+Original:
+--------
+
+SELECT id,c_src, c_name, c_price, c_cond, c_mile, c_desc FROM cars_tbl ORDER BY id desc
+
+Injected:
+--------
+
+SELECT id, c_name, c_price FROM cars_tbl ORDER BY id desc;
+
++----+----------------------------------+---------+
+| id | c_name                           | c_price |
++----+----------------------------------+---------+
+| 24 | 1962 Austin-Healey 3000 MK II    |   59995 |
+| 23 | 1959 Austin-Healey 100-6         |   19750 |
+| 22 | 1958 Austin-Healey 100-6         |   15750 |
+| 21 | 1965 Austin-Healey 3000          |   42500 |
+| 20 | 1958 Austin-Healey BN4           |    9750 |
+| 19 | 1966 Austin-Healey 3000          |   49500 |
+| 18 | 1960 Austin-Healey BT7           |   51900 |
+| 17 | 1963 Austin-Healey 3000          |   19500 |
+| 16 | 1967 Austin-Healey 3000          |  109900 |
+| 15 | 1959 Austin-Healey BT7           |   16750 |
+| 14 | 1954 Austin-Healey 100-4         |   18750 |
+| 13 | 1956 Austin-Healey 100-4         |   69500 |
+| 12 | 1960 Austin-Healey MK I          |   37995 |
+| 11 | 1956 Austin-Healey 100M Le Mans  |  224500 |
+| 10 | 1967 Austin-Healey 3000 Mk III   |   89900 |
+|  9 | 1956 Austin-Healey Convertible   |   29500 |
+|  8 | 1962 Austin-Healey 3000          |   29950 |
+|  7 | 1961 Austin-Healey 3000 Mark1    |   98500 |
+|  6 | 1953 Austin-Healey 100-4         |   14750 |
+|  5 | 1960 Austin-Healey 3000          |   15750 |
+|  4 | 1960 Austin-Healey 3000          |   15750 |
+|  3 | 1967 Austin-Healey 3000          |   39500 |
+|  2 | 1959 Austin-Healey Sprite MKIII  |   18900 |
+|  1 | 1958 Austin-Healey Sprite MKIII  |       0 |
++----+----------------------------------+---------+
+24 rows in set (0.00 sec)
+
+mysql> SELECT id, c_name, c_price FROM cars_tbl, ORDER BY id desc limit 0,2;
++----+--------------------------------+---------+
+| id | c_name                         | c_price |
++----+--------------------------------+---------+
+| 24 | 1962 Austin-Healey 3000 MK II  |   59995 |
+| 23 | 1959 Austin-Healey 100-6       |   19750 |
++----+--------------------------------+---------+
+
+
+mysql> select car_id, count(car_id) review,round(sum(rate)/count(car_id),1) avg from review_tbl group by car_id order by car_id desc limit 0,2;
++--------+--------+------+
+| car_id | review | avg  |
++--------+--------+------+
+|     24 |      1 |  5.0 |
+|     23 |      2 |  3.0 |
++--------+--------+------+
+
+
+
+mysql> SELECT id, c_name, c_price, review, avg FROM cars_tbl,(select car_id,count(car_id) review,round(sum(rate)/count(car_id),1) avg from review_tbl group by car_id) reviewtbl where cars_tbl.id = reviewtbl.car_id  ORDER BY id desc limit 0,2;
+
++----+--------------------------------+---------+--------+------+
+| id | c_name                         | c_price | review | avg  |
++----+--------------------------------+---------+--------+------+
+| 24 | 1962 Austin-Healey 3000 MK II  |   59995 |      1 |  5.0 |
+| 23 | 1959 Austin-Healey 100-6       |   19750 |      2 |  3.0 |
++----+--------------------------------+---------+--------+------+
+
+
+mysql>  SELECT id, c_name, c_price, review, avg, ceil(avg) rated FROM cars_tbl,(select car_id,count(car_id) review,round(sum(rate)/count(car_id),1) avg from review_tbl group by car_id) reviewtbl where cars_tbl.id = reviewtbl.car_id  ORDER BY id desc;
++----+----------------------------------+---------+--------+------+
+| id | c_name                           | c_price | review | avg  |
++----+----------------------------------+---------+--------+------+
+| 24 | 1962 Austin-Healey 3000 MK II    |   59995 |      1 |  5.0 |
+| 23 | 1959 Austin-Healey 100-6         |   19750 |      2 |  3.0 |
+| 22 | 1958 Austin-Healey 100-6         |   15750 |      1 |  3.0 |
+| 21 | 1965 Austin-Healey 3000          |   42500 |      1 |  2.0 |
+| 20 | 1958 Austin-Healey BN4           |    9750 |      1 |  3.0 |
+| 19 | 1966 Austin-Healey 3000          |   49500 |      1 |  4.0 |
+| 18 | 1960 Austin-Healey BT7           |   51900 |      1 |  2.0 |
+| 17 | 1963 Austin-Healey 3000          |   19500 |      1 |  2.0 |
+| 16 | 1967 Austin-Healey 3000          |  109900 |      1 |  2.0 |
+| 15 | 1959 Austin-Healey BT7           |   16750 |      1 |  2.0 |
+| 14 | 1954 Austin-Healey 100-4         |   18750 |      1 |  2.0 |
+| 13 | 1956 Austin-Healey 100-4         |   69500 |      1 |  2.0 |
+| 12 | 1960 Austin-Healey MK I          |   37995 |      1 |  1.0 |
+| 11 | 1956 Austin-Healey 100M Le Mans  |  224500 |      1 |  3.0 |
+| 10 | 1967 Austin-Healey 3000 Mk III   |   89900 |      1 |  2.0 |
+|  9 | 1956 Austin-Healey Convertible   |   29500 |      1 |  2.0 |
+|  8 | 1962 Austin-Healey 3000          |   29950 |      1 |  2.0 |
+|  7 | 1961 Austin-Healey 3000 Mark1    |   98500 |      1 |  1.0 |
+|  6 | 1953 Austin-Healey 100-4         |   14750 |      1 |  1.0 |
+|  5 | 1960 Austin-Healey 3000          |   15750 |      1 |  1.0 |
+|  4 | 1960 Austin-Healey 3000          |   15750 |      1 |  2.0 |
+|  3 | 1967 Austin-Healey 3000          |   39500 |      1 |  1.0 |
+|  2 | 1959 Austin-Healey Sprite MKIII  |   18900 |      1 |  2.0 |
+|  1 | 1958 Austin-Healey Sprite MKIII  |       0 |      1 |  2.0 |
++----+----------------------------------+---------+--------+------+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+ INSERT INTO ` select * from review_tbl where guest_id = (select id from guest_tbl where name='venkatesh');
+
+select * from review_tbl where guest_id = (select id from guest_tbl where name ='venkatesh') && car_id = "24";
+
+
+
+mysql> select count(*) from review_tbl where guest_id = (select id from guest_tbl where name ='venkatesh') && car_id = "24";
++----------+
+| count(*) |
++----------+
+|        1 |
++----------+
+1 row in set (0.00 sec)
+
+mysql> select count(*) from review_tbl where guest_id = (select id from guest_tbl where name ='venkatesh') && car_id = "1";
++----------+
+| count(*) |
++----------+
+|        0 |
++----------+
+1 row in set (0.00 sec)
+
+
+SELECT * FROM `review_tbl` WHERE `car_id`= 10 AND `guest_id` = (SELECT `id` FROM `guest_tbl` WHERE `name` = 'prasad');
+
+
+$sql = "SELECT id, c_src, c_name, c_price, c_price, c_cond, c_mile, c_desc, review, avg, ceil(avg) rated FROM cars_tbl,(select car_id,count(car_id) review,round(sum(rate)/count(car_id),1) avg from review_tbl group by car_id) reviewtbl where cars_tbl.id = reviewtbl.car_id " . $queryCondition;
+
+
+select car_id,count(car_id) review,round(sum(rate)/count(car_id),1) avg,ceil(round(sum(rate)/count(car_id),1)) rated from review_tbl
+
+
+select * from (select car_id,count(car_id) review,round(sum(rate)/count(car_id),1) avg,ceil(round(sum(rate)/count(car_id),1)) rated from review_tbl  group by car_id) reviewtbl where car_id = 24;
